@@ -24,7 +24,7 @@ const client = new MongoClient(uri, {
 async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
-    await client.connect();
+    // await client.connect();
 
     // sending to mongo
     const coffeeCollection = client.db("coffeeDB").collection("coffee")
@@ -46,27 +46,27 @@ async function run() {
     })
 
     // update
-    app.put('/coffee/:id', async(req, res) => {
+    app.put('/coffee/:id', async (req, res) => {
       const id = req.params.id;
-      const filter = {_id: new ObjectId(id)}
+      const filter = { _id: new ObjectId(id) }
       const options = { upsert: true };
       const updatedCoffee = req.body;
 
       const coffee = {
-          $set: {
-              name: updatedCoffee.name, 
-              quantity: updatedCoffee.quantity, 
-              supplier: updatedCoffee.supplier, 
-              taste: updatedCoffee.taste, 
-              category: updatedCoffee.category, 
-              details: updatedCoffee.details, 
-              photo: updatedCoffee.photo
-          }
+        $set: {
+          name: updatedCoffee.name,
+          quantity: updatedCoffee.quantity,
+          supplier: updatedCoffee.supplier,
+          taste: updatedCoffee.taste,
+          category: updatedCoffee.category,
+          details: updatedCoffee.details,
+          photo: updatedCoffee.photo
+        }
       }
 
       const result = await coffeeCollection.updateOne(filter, coffee, options);
       res.send(result);
-  })
+    })
 
     // app.put('/coffee/:id', async (req, res) => {
 
@@ -123,7 +123,7 @@ async function run() {
     })
 
     // create user
-    app.post('/user', async(req, res) => {
+    app.post('/user', async (req, res) => {
       const user = req.body
       console.log(user)
 
@@ -131,10 +131,34 @@ async function run() {
       res.send(result)
     })
 
+    // update user
+    app.patch('/user', async (req, res) => {
+      const user = req.body;
+      const filter = { email: user.email }
+      const options = { upsert: true };
+
+      const updateUser = {
+        $set: {
+          lastLoggedAt: user.lastLoggedAt,
+        }
+      }
+
+      const result = await userCollection.updateOne(filter, updateUser, options);
+      res.send(result);
+    })
+
+    // delete user
+    app.delete('/user/:id', async (req, res) => {
+      const id = req.params.id
+      const query = { _id: new ObjectId(id) }
+      const result = await userCollection.deleteOne(query)
+      res.send(result)
+    })
+
 
 
     // Send a ping to confirm a successful connection
-    await client.db("admin").command({ ping: 1 });
+    // await client.db("admin").command({ ping: 1 });
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
   } finally {
     // Ensures that the client will close when you finish/error
